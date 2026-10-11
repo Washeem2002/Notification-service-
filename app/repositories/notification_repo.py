@@ -61,9 +61,7 @@ class NotificationRepository:
                     and_(Notification.created_at == created_at, Notification.id < last_id),
                 )
             )
-        query = query.order_by(Notification.created_at.desc(), Notification.id.desc()).limit(
-            limit
-        )
+        query = query.order_by(Notification.created_at.desc(), Notification.id.desc()).limit(limit)
         result = await self.session.execute(query)
         return list(result.scalars())
 

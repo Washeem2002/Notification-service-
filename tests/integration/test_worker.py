@@ -12,7 +12,7 @@ async def wait_for_status(client: AsyncClient, notification_id: str, expected: s
         if body["status"] == expected:
             return body
         await asyncio.sleep(0.05)
-    raise AssertionError(f"notification never reached {expected}")
+    raise AssertionError(f"notification never reached {expected}: {body}")
 
 
 async def test_worker_runner_delivers_end_to_end(client: AsyncClient, harness: Harness) -> None:

@@ -145,7 +145,9 @@ class NotificationService:
             log.warning("queue_remove_failed", id=str(notification_id), error=str(exc))
         return notification
 
-    async def list_dead(self, limit: int, cursor: str | None) -> tuple[list[Notification], str | None]:
+    async def list_dead(
+        self, limit: int, cursor: str | None
+    ) -> tuple[list[Notification], str | None]:
         return await self.list_page(limit, None, Status.dead.value, None, cursor)
 
     async def retry_dead(self, notification_id: uuid.UUID) -> Notification:

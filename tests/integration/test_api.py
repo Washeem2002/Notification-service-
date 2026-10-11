@@ -128,9 +128,7 @@ async def test_template_flow(client: AsyncClient) -> None:
 
 
 async def test_template_update_and_delete(client: AsyncClient) -> None:
-    await client.post(
-        "/api/v1/templates", json={"name": "t1", "channel": "sms", "body": "v1"}
-    )
+    await client.post("/api/v1/templates", json={"name": "t1", "channel": "sms", "body": "v1"})
     updated = await client.put("/api/v1/templates/t1", json={"body": "v2"})
     assert updated.json()["body"] == "v2"
     assert (await client.get("/api/v1/templates")).json()[0]["name"] == "t1"

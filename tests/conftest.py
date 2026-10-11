@@ -1,5 +1,6 @@
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+from pathlib import Path
 
 import fakeredis
 import pytest
@@ -10,7 +11,6 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.pool import StaticPool
 
 from app.core.config import Settings
 from app.infra.queue import NotificationQueue
@@ -42,9 +42,9 @@ def settings() -> Settings:
 
 
 @pytest.fixture
-async def engine() -> AsyncIterator[AsyncEngine]:
+async def engine(tmp_path: Path) -> AsyncIterator[AsyncEngine]:
     engine = create_async_engine(
-        "sqlite+aiosqlite://", poolclass=StaticPool, connect_args={"check_same_thread": False}
+        f"sqlite+aiosqlite:///{tmp_path / 'test.db'}", connect_args={"timeout": 30}
     )
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

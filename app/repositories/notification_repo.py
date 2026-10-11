@@ -1,8 +1,9 @@
 import base64
 import uuid
 from datetime import datetime
+from typing import Any, cast
 
-from sqlalchemy import and_, or_, select, update
+from sqlalchemy import CursorResult, and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.base import Status, utcnow
@@ -97,7 +98,7 @@ class NotificationRepository:
                 updated_at=utcnow(),
             )
         )
-        return result.rowcount == 1
+        return cast(CursorResult[Any], result).rowcount == 1
 
     async def cancel(self, notification_id: uuid.UUID) -> bool:
         result = await self.session.execute(
@@ -108,7 +109,7 @@ class NotificationRepository:
             )
             .values(status=Status.cancelled, updated_at=utcnow())
         )
-        return result.rowcount == 1
+        return cast(CursorResult[Any], result).rowcount == 1
 
     async def reclaim_expired(self, notification_id: uuid.UUID, now: datetime, dead: bool) -> bool:
         values = (
@@ -125,7 +126,7 @@ class NotificationRepository:
             )
             .values(locked_until=None, updated_at=utcnow(), **values)
         )
-        return result.rowcount == 1
+        return cast(CursorResult[Any], result).rowcount == 1
 
     async def expired_leases(self, now: datetime, limit: int = 200) -> list[Notification]:
         result = await self.session.execute(

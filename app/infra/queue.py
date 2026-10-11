@@ -27,13 +27,14 @@ class NotificationQueue:
         item = await self.redis.bzpopmin(READY_KEY, timeout=timeout)
         if not item:
             return None
-        return uuid.UUID(item[1])
+        return uuid.UUID(str(item[1]))
 
     async def promote_due(self, now: float | None = None, limit: int = 500) -> int:
         moment = time.time() if now is None else now
         due = await self.redis.zrangebyscore(DELAYED_KEY, "-inf", moment, start=0, num=limit)
         promoted = 0
-        for member in due:
+        for entry in due:
+            member = str(entry)
             if await self.redis.zrem(DELAYED_KEY, member):
                 priority, _, raw_id = member.partition(":")
                 await self.redis.zadd(READY_KEY, {raw_id: ready_score(int(priority), moment)})

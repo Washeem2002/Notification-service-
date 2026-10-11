@@ -20,9 +20,7 @@ class NotificationQueue:
     async def push(self, notification_id: uuid.UUID, priority: int) -> None:
         await self.redis.zadd(READY_KEY, {str(notification_id): ready_score(priority)})
 
-    async def push_delayed(
-        self, notification_id: uuid.UUID, priority: int, due_at: float
-    ) -> None:
+    async def push_delayed(self, notification_id: uuid.UUID, priority: int, due_at: float) -> None:
         await self.redis.zadd(DELAYED_KEY, {f"{priority}:{notification_id}": due_at})
 
     async def pop(self, timeout: float = 1.0) -> uuid.UUID | None:

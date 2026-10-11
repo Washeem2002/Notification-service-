@@ -110,6 +110,23 @@ class NotificationRepository:
         )
         return result.rowcount == 1
 
+    async def reclaim_expired(self, notification_id: uuid.UUID, now: datetime, dead: bool) -> bool:
+        values = (
+            {"status": Status.dead, "last_error": "lease expired after final attempt"}
+            if dead
+            else {"status": Status.retrying, "next_attempt_at": now}
+        )
+        result = await self.session.execute(
+            update(Notification)
+            .where(
+                Notification.id == notification_id,
+                Notification.status == Status.processing,
+                Notification.locked_until < now,
+            )
+            .values(locked_until=None, updated_at=utcnow(), **values)
+        )
+        return result.rowcount == 1
+
     async def expired_leases(self, now: datetime, limit: int = 200) -> list[Notification]:
         result = await self.session.execute(
             select(Notification)
